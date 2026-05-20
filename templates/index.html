@@ -204,53 +204,29 @@
     </div>
 
     <script>
-        // Connect to Socket.IO server (otomatis ke server yang sama)
         const socket = io();
 
-        const videoElement = document.getElementById('video-stream');
-        const overallStatusEl = document.getElementById('overall-status');
-        const statusCardEl = document.getElementById('status-card');
-        const earValEl = document.getElementById('ear-val');
-        const marValEl = document.getElementById('mar-val');
-        const headValEl = document.getElementById('head-val');
-        const connDot = document.getElementById('conn-dot');
-        const connText = document.getElementById('conn-text');
+        const cameraFeed = document.getElementById("camera-feed");
+        const statusText = document.getElementById("status");
+        const earText = document.getElementById("ear");
+        const marText = document.getElementById("mar");
+        const headText = document.getElementById("head");
 
         socket.on('connect', () => {
-            console.log("Connected to server!");
-            connDot.classList.add('connected');
-            connText.innerText = "Connected to Server (Awaiting Feed)";
+            console.log("Connected to server");
         });
 
-        socket.on('disconnect', () => {
-            console.log("Disconnected from server");
-            connDot.classList.remove('connected');
-            connText.innerText = "Disconnected from Server";
-            videoElement.src = "";
-        });
-
-        // Menerima data stream dari server (broadcast dari Raspberry Pi)
         socket.on('update_dashboard', (data) => {
-            if (data.image) {
-                // Update gambar video base64
-                videoElement.src = "data:image/jpeg;base64," + data.image;
-                connText.innerText = "Receiving Live Feed...";
-            }
 
-            // Update nilai statistik
-            if (data.ear !== undefined) earValEl.innerText = data.ear.toFixed(2);
-            if (data.mar !== undefined) marValEl.innerText = data.mar.toFixed(2);
-            if (data.head !== undefined) headValEl.innerText = data.head.toFixed(1);
+            // UPDATE VIDEO FRAME REALTIME
+            cameraFeed.src = "data:image/jpeg;base64," + data.image + "?t=" + new Date().getTime();
 
-            // Update status & UI
-            if (data.status) {
-                overallStatusEl.innerText = data.status;
-                if (data.status === "MENGANTUK!" || data.status === "MENGANTUK") {
-                    statusCardEl.classList.add("danger");
-                } else {
-                    statusCardEl.classList.remove("danger");
-                }
-            }
+            // UPDATE DATA
+            statusText.innerText = data.status;
+            earText.innerText = Number(data.ear).toFixed(2);
+            marText.innerText = Number(data.mar).toFixed(2);
+            headText.innerText = Number(data.head).toFixed(1);
+
         });
     </script>
 </body>
