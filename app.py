@@ -110,12 +110,12 @@ def handle_video_frame(data):
         # KIRIM KE DASHBOARD
         # ===============================
         socketio.emit('update_dashboard', {
-            'image': data.get('image'),
-            'ear': ear,
-            'mar': mar,
-            'head': head,
-            'status': status
-        }, broadcast=True)
+    'image': data.get('image'),
+    'ear': ear,
+    'mar': mar,
+    'head': head,
+    'status': status
+})
 
     except Exception as e:
         print(f"ERROR: {e}")

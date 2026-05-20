@@ -204,7 +204,6 @@
     </div>
 
     <script>
-        const socket = io();
 
         const cameraFeed = document.getElementById("video-stream");
         const statusText = document.getElementById("overall-status");
@@ -214,6 +213,10 @@
 
         const connDot = document.getElementById("conn-dot");
         const connText = document.getElementById("conn-text");
+
+        const socket = io("https://driver-monitoring-ai.onrender.com", {
+            transports: ["websocket", "polling"]
+        });
 
         socket.on('connect', () => {
             console.log("Connected to server");
