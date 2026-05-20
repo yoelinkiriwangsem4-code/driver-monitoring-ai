@@ -12,8 +12,7 @@ app = Flask(__name__)
 
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",
-    async_mode='threading'
+    cors_allowed_origins="*"
 )
 
 # ===============================
