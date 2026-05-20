@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Driver Monitoring Dashboard</title>
     <!-- Socket.IO Client -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-        integrity="sha512-q/dWJ3kcmjXXD4bZpwE/FzZIfX2e5L3ZzH3S2D0T5h5eUeX/X1wN2tB8lI1t4B+A/xW62+wB1d8Bw=="
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -206,9 +204,8 @@
     </div>
 
     <script>
-        // Connect to Socket.IO server secara eksplisit
-        // const socket = io("http://localhost:5000");
-        const socket = io("https://web-production-773c1.up.railway.app");
+        // Connect to Socket.IO server (otomatis ke server yang sama)
+        const socket = io();
 
         const videoElement = document.getElementById('video-stream');
         const overallStatusEl = document.getElementById('overall-status');

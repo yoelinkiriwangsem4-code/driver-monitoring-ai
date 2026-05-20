@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 # Enable CORS for SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
 @app.route('/')
 def index():
