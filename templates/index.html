@@ -237,9 +237,7 @@
             // VIDEO REALTIME
             if (data.image) {
                 cameraFeed.src =
-                    "data:image/jpeg;base64," +
-                    data.image +
-                    "?t=" + new Date().getTime();
+                    "data:image/jpeg;base64," + data.image;
             }
 
             // UPDATE STATUS
