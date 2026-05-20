@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Monitoring Dashboard</title>
+    <!-- Socket.IO Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjXXD4bZpwE/FzZIfX2e5L3ZzH3S2D0T5h5eUeX/X1wN2tB8lI1t4B+A/xW62+wB1d8Bw==" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --safe-color: #22c55e;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            background-color: #0b1120;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            width: 90%;
+            max-width: 1200px;
+            justify-content: center;
+        }
+
+        .video-panel {
+            flex: 1 1 600px;
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .video-panel img {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            background-color: #000;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border: 2px solid #334155;
+        }
+
+        .status-panel {
+            flex: 1 1 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .status-card {
+            border-top: 5px solid var(--safe-color);
+        }
+
+        .status-card.danger {
+            border-top-color: var(--danger-color);
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        .status-card .value {
+            color: var(--safe-color);
+        }
+
+        .status-card.danger .value {
+            color: var(--danger-color);
+        }
+
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .connection-status {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background-color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #94a3b8;
+        }
+
+        .dot.connected {
+            background-color: var(--safe-color);
+            box-shadow: 0 0 8px var(--safe-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Driver Monitoring Dashboard</h1>
+    </header>
+
+    <div class="container">
+        <div class="video-panel">
+            <h3 style="margin-top:0; color: #cbd5e1; align-self: flex-start;">Live Camera Feed</h3>
+            <img id="video-stream" src="" alt="Waiting for camera feed...">
+            
+            <div class="connection-status">
+                <div id="conn-dot" class="dot"></div>
+                <span id="conn-text">Disconnected from Server</span>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <div id="status-card" class="card status-card">
+                <h3>Overall Status</h3>
+                <p id="overall-status" class="value">AMAN</p>
+            </div>
+
+            <div class="card">
+                <h3>Eye Aspect Ratio (EAR)</h3>
+                <p id="ear-val" class="value">0.00</p>
+            </div>
+
+            <div class="card">
+                <h3>Mouth Aspect Ratio (MAR)</h3>
+                <p id="mar-val" class="value">0.00</p>
+            </div>
+
+            <div class="card">
+                <h3>Head Drop</h3>
+                <p id="head-val" class="value">0.0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Connect to Socket.IO server secara eksplisit
+        const socket = io("http://localhost:5000");
+        
+        const videoElement = document.getElementById('video-stream');
+        const overallStatusEl = document.getElementById('overall-status');
+        const statusCardEl = document.getElementById('status-card');
+        const earValEl = document.getElementById('ear-val');
+        const marValEl = document.getElementById('mar-val');
+        const headValEl = document.getElementById('head-val');
+        const connDot = document.getElementById('conn-dot');
+        const connText = document.getElementById('conn-text');
+
+        socket.on('connect', () => {
+            console.log("Connected to server!");
+            connDot.classList.add('connected');
+            connText.innerText = "Connected to Server (Awaiting Feed)";
+        });
+
+        socket.on('disconnect', () => {
+            console.log("Disconnected from server");
+            connDot.classList.remove('connected');
+            connText.innerText = "Disconnected from Server";
+            videoElement.src = "";
+        });
+
+        // Menerima data stream dari server (broadcast dari Raspberry Pi)
+        socket.on('update_dashboard', (data) => {
+            if (data.image) {
+                // Update gambar video base64
+                videoElement.src = "data:image/jpeg;base64," + data.image;
+                connText.innerText = "Receiving Live Feed...";
+            }
+
+            // Update nilai statistik
+            if (data.ear !== undefined) earValEl.innerText = data.ear.toFixed(2);
+            if (data.mar !== undefined) marValEl.innerText = data.mar.toFixed(2);
+            if (data.head !== undefined) headValEl.innerText = data.head.toFixed(1);
+
+            // Update status & UI
+            if (data.status) {
+                overallStatusEl.innerText = data.status;
+                if (data.status === "MENGANTUK!" || data.status === "MENGANTUK") {
+                    statusCardEl.classList.add("danger");
+                } else {
+                    statusCardEl.classList.remove("danger");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
